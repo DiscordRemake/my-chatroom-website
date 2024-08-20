@@ -1,0 +1,116 @@
+@echo off
+title Chatroom
+
+:: Initialize default credentials (for demonstration purposes)
+set "defaultUsername=user"
+set "defaultPassword=password"
+
+:: Check if user is already logged in
+if exist username.txt (
+    set /p username=<username.txt
+    goto Chatroom
+)
+
+:: Main menu for login or registration
+:menu
+cls
+color 3
+echo Chatroom - Main Menu
+echo.
+echo 1. Login
+echo 2. Register
+echo 3. Exit
+set /p choice=Choose an option: 
+
+if "%choice%"=="1" goto login
+if "%choice%"=="2" goto register
+if "%choice%"=="3" exit
+
+goto menu
+
+:: Login Section
+:login
+cls
+color 3
+echo Login
+set /p username=Enter your username: 
+set /p password=Enter your password: 
+
+:: Check if credentials match the default ones
+if "%username%"=="%defaultUsername%" if "%password%"=="%defaultPassword%" (
+    goto login_success
+) else (
+    echo Invalid username or password.
+    pause
+    goto menu
+)
+
+:login_success
+:: Save username to a file
+echo %username% > username.txt
+echo %username% logged in! >> Chat.txt
+goto Chatroom
+
+:: Registration Section
+:register
+cls
+color 3
+echo Register
+set /p username=Enter a new username: 
+
+:: For simplicity, we’ll overwrite the default credentials
+:: (In a real application, you would store this securely)
+set /p password=Enter a new password: 
+
+:: Update default credentials
+set "defaultUsername=%username%"
+set "defaultPassword=%password%"
+
+echo %username% registered successfully!
+pause
+:: Automatically log in the newly registered user
+echo %username% > username.txt
+goto Chatroom
+
+:Chatroom
+cls
+color 3
+echo Chatroom - Type 'logout' to log out, 'del' to delete your account, or 'exit' to quit
+echo.
+type Chat.txt
+echo.
+set /p Input=Say something or press enter to refresh: 
+
+:: Check for commands
+if /i "%Input%"=="logout" goto logout
+if /i "%Input%"=="del" goto delete_account
+if /i "%Input%"=="exit" goto exit
+
+:: Log the chat message
+echo %username%: %Input% >> Chat.txt
+
+:: Go back to chatroom
+goto Chatroom
+
+:delete_account
+:: Delete user account and associated data
+echo Deleting your account...
+del username.txt
+:: For simplicity, we are not actually deleting the credentials here in the script.
+:: In a real application, you would also remove or update the persistent storage of credentials.
+echo Your account has been deleted.
+pause
+goto menu
+
+:logout
+del username.txt
+del Chat.txt
+echo You have been logged out.
+pause
+goto menu
+
+:exit
+del username.txt
+echo Goodbye, %username%!
+pause
+exit
